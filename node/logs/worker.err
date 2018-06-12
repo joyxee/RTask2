@@ -1,0 +1,8 @@
+##############################
+ErrorTime : 2018-06-12 14:44:20
+ErrorData : Found no valid connections in list: [<GearmanConnection 127.0.0.1:4730 connected=False>]
+##############################
+##############################
+ErrorTime : 2018-06-12 14:51:03
+ErrorData : Expecting byte string, got <class 'dict'>
+##############################
