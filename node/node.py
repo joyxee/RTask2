@@ -13,7 +13,7 @@ def RPC_auth(func):
     def wrapper(*args, **kwargs):
         if len(args) < 2:
             result = 'Wrong arguments'
-        elif args[1] != config.RPC_PWD:
+        elif args[1] != config.RPC_PASSWORD:
             result = 'Wrong password'
         else:
             result = func(*args, **kwargs)

@@ -36,5 +36,5 @@ GEARMAN_HOST = '192.168.0.171'
 GEARMAN_PORT = '4730'
 
 # RPC远程调用，认证和端口配置
-RPC_PWD = 'rpc'
+RPC_PASSWORD = 'rpc'
 RPC_PORT = 5555

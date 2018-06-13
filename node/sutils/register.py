@@ -23,7 +23,6 @@ class Register(object):
 
     def register_node(self):
         node_data = {'macid': self.macid,
-                     'tasks': list(),
                      'ips': self.ips,
                      'hostname': self.hostname,
                      'platform': self.platform,
