@@ -9,8 +9,8 @@ TASK_NAME = 'demo'
 TASK_DESCRIPTION = '这是一个Demo，接受任务后打印任务id到Log文件。'
 
 # 存放节点信息的Redis数据库，应由服务端统一提供一个Redis数据库给所有节点连接
-NODE_REDIS_HOST = '127.0.0.1'
-NODE_REDIS_PORT = 6379
+NODE_REDIS_HOST = '192.168.0.171'
+NODE_REDIS_PORT = 6380
 NODE_REDIS_DB = 0
 NODE_REDIS_PWD = ''
 
