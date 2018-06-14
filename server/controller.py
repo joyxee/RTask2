@@ -1,5 +1,6 @@
 # coding=UTF-8
 
+import re
 import redis
 import zerorpc
 import config
@@ -56,7 +57,7 @@ class NodeController(object):
             rpcip = None
             ips = data['ips']
             for ip in ips:
-                if self._rpcip_check(ip):
+                if re.match('\d+\.\d+\.\d+\.\d+', ip) and self._rpcip_check(ip):
                     rpcip = ip
                     break
             data['rpcip'] = "tcp://{ip}:{port}".format(
