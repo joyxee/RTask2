@@ -47,12 +47,18 @@
                 </tr>
                 <tr>
                     <td>操作</td>
-                    <td><a href=""
-                           style="text-decoration: none; color: #31b0d5">详细</a></td>
-                    <td><a href=""
-                           style="text-decoration: none; color: #e38d13">停止所有进程</a></td>
-                    <td><a href=""
-                           style="text-decoration: none; color: red">删除</a></td>
+                    <td><a href="{{ url_for('node_info', macid=node['macid']) }}"
+                           class="btn btn-info">详细</a></td>
+                    <td>
+                        <form action="{{ url_for('node_stop_all', macid=node['macid']) }}" method="post">
+                            <input class="btn btn-default" type="submit" value="停止所有进程" onclick="return confirm('确认停止节点{{ node['hostname'] }}的所有进程吗?');">
+                        </form>
+                    </td>
+                    <td>
+                        <form action="{{ url_for('node_delete', macid=node['macid']) }}" method="post">
+                            <input class="btn btn-danger" type="submit" value="删除" onclick="return confirm('确认删除节点{{ node['hostname'] }}吗?');">
+                        </form>
+                    </td>
                 </tr>
             </table>
         </div>

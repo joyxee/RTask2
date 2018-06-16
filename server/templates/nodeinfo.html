@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}
+节点信息
+{% endblock %}
+
+{% block content %}
+
+<h3 class="text-muted">基本信息</h3>
+<table class="table table-hover table-striped table-bordered" style="text-align: center;">
+    <tr>
+        <td>节点ID</td>
+        <td>{{ base_info['macid'] }}</td>
+    </tr>
+    <tr>
+        <td>主机名</td>
+        <td>{{ base_info['hostname'] }}</td>
+    </tr>
+    <tr>
+        <td>系统</td>
+        <td>{{ base_info['platform'] }}</td>
+    </tr>
+    <tr>
+        <td>IP列表</td>
+        <td>{{ base_info['ips'] }}</td>
+    </tr>
+    <tr>
+        <td>远程IP</td>
+        <td>{{ base_info['rpcip'] }}</td>
+    </tr>
+    <tr>
+        <td>任务名</td>
+        <td colspan="3">{{ base_info['taskname'] }}</td>
+    </tr>
+    <tr>
+        <td>任务说明</td>
+        <td colspan="3">{{ base_info['taskdescription'] }}</td>
+    </tr>
+    <tr>
+        <td>进程数</td>
+        <td colspan="3">{{ base_info['workers'] }}</td>
+    </tr>
+</table>
+
+<h3 class="text-muted">CPU信息</h3>
+<table class="table table-hover table-striped table-bordered" style="text-align: center;">
+    <tr>
+        <td>CPU使用率</td>
+        <td>{{ cpu_info['cpu_percent'] }}</td>
+    </tr>
+    <tr>
+        <td>系统负载</td>
+        <td>{{ cpu_info['loadavg'] }}</td>
+    </tr>
+    <tr>
+        <td>开机时间</td>
+        <td>{{ cpu_info['boot_time'] }}</td>
+    </tr>
+</table>
+
+<h3 class="text-muted">内存信息</h3>
+<table class="table table-hover table-striped table-bordered" style="text-align: center;">
+    <tr>
+        <td>内存总量(可用内存)</td>
+        <td>{{ memory_info['virtual_total'] }} ({{ memory_info['virtual_available'] }})</td>
+        <td>内存使用率</td>
+        <td>{{ memory_info['virtual_percent'] }}</td>
+    </tr>
+    <tr>
+        <td>已用内存</td>
+        <td>{{ memory_info['virtual_used'] }}</td>
+        <td>剩余内存</td>
+        <td>{{ memory_info['virtual_free'] }}</td>
+    </tr>
+    <tr>
+        <td>交换内存总量</td>
+        <td>{{ memory_info['swap_total'] }}</td>
+        <td>交换内存使用率</td>
+        <td>{{ memory_info['swap_percent'] }}</td>
+    </tr>
+    <tr>
+        <td>已用交换内存</td>
+        <td>{{ memory_info['swap_used'] }}</td>
+        <td>剩余交换内存</td>
+        <td>{{ memory_info['swap_used'] }}</td>
+    </tr>
+
+</table>
+
+<h3 class="text-muted">网络信息</h3>
+<table class="table table-hover table-striped table-bordered" style="text-align: center;">
+    {% for network in network_info %}
+        <tr>
+            <td>网卡名称</td>
+            <td>{{ network['iface'] }}</td>
+            <td>IP地址</td>
+            <td>{{ network['ip'] }}</td>
+        </tr>
+        <tr>
+            <td>发送数据包</td>
+            <td>{{ network['packets_sent'] }}</td>
+            <td>接收数据包</td>
+            <td>{{ network['packets_recv'] }}</td>
+        </tr>
+        <tr>
+            <td>发送流量</td>
+            <td>{{ network['sent'] }}</td>
+            <td>接收流量</td>
+            <td>{{ network['recv'] }}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+<h3 class="text-muted">磁盘信息</h3>
+<table class="table table-hover table-striped table-bordered" style="text-align: center;">
+    <tr>
+        <td>磁盘总容量</td>
+        <td>{{ disk_info['total'] }}</td>
+        <td>磁盘使用率</td>
+        <td>{{ disk_info['percent'] }}</td>
+    </tr>
+    <tr>
+        <td>已用容量</td>
+        <td>{{ disk_info['used'] }}</td>
+        <td>剩余容量</td>
+        <td>{{ disk_info['free'] }}</td>
+    </tr>
+</table>
+
+{% endblock %}

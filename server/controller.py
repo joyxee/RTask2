@@ -8,10 +8,9 @@ from contextlib import contextmanager
 
 
 @contextmanager
-def connect_rpc_node(rpcip):
+def connect_rpc_node(rpc_ip_port):
     rpc_node = zerorpc.Client(timeout=3, heartbeat=3)
-    rpc_node.connect(
-        "tcp://{ip}:{port}".format(ip=rpcip, port=config.RPC_PORT))
+    rpc_node.connect(rpc_ip_port)
     try:
         yield rpc_node
     except Exception as e:
@@ -54,30 +53,30 @@ class NodeController(object):
         nodes = list()
         for _, v in nodes_str.items():
             data = eval(v)
-            rpcip = None
+            dst_ip = None
             ips = data['ips']
             for ip in ips:
                 if re.match('\d+\.\d+\.\d+\.\d+', ip) and self._rpcip_check(ip):
-                    rpcip = ip
+                    dst_ip = ip
                     break
             data['rpcip'] = "tcp://{ip}:{port}".format(
-                ip=rpcip, port=config.RPC_PORT)
-            data['workers'] = self._node_worker_count(rpcip)
+                ip=dst_ip, port=config.RPC_PORT)
+            data['workers'] = self._node_worker_count(data['rpcip'])
             nodes.append(data)
         return nodes
 
     def node_search(self, macid):
         node = self.client.hget('nodes', macid)
         node = eval(node)
-        rpcip = None
+        dst_ip = None
         ips = node['ips']
         for ip in ips:
             if self._rpcip_check(ip):
-                rpcip = ip
+                dst_ip = ip
                 break
         node['rpcip'] = "tcp://{ip}:{port}".format(
-            ip=rpcip, port=config.RPC_PORT)
-        node['workers'] = self._node_worker_count(rpcip)
+            ip=dst_ip, port=config.RPC_PORT)
+        node['workers'] = self._node_worker_count(node['rpcip'])
         return node
 
     def node_start_worker(self, macid, worker_nums=1):
@@ -104,10 +103,10 @@ class NodeController(object):
 
     def node_remove(self, macid):
         to_remove_node = self.node_search(macid)
+        self.client.hdel('nodes', macid)
         with connect_rpc_node(to_remove_node['rpcip']) as rpc:
             rpc.stop_all_workers(config.RPC_PASSWORD)
             rpc.shutdown(config.RPC_PASSWORD)
-        self.client.hdel('nodes', macid)
 
 
 class TaskController(object):
