@@ -20,8 +20,8 @@
         <ul class="nav nav-justified">
             <li><a href="">任务队列</a></li>
             <li><a href="{{ url_for('node_lists') }}">工作节点</a></li>
-            <li><a href="">运行进程</a></li>
-            <li><a href="">Redis状态</a></li>
+            <li><a href="{{ url_for('worker_lists') }}">运行进程</a></li>
+            <li><a href="{{ url_for('redis_lists') }}">Redis状态</a></li>
         </ul>
     </div>
     <br>

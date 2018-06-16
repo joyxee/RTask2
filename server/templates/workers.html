@@ -1,0 +1,49 @@
+ {% extends 'base.html' %}
+
+{% block title %}
+运行进程
+{% endblock %}
+
+{% block content %}
+    <table class="table table-hover table-striped table-bordered" style="text-align: center;">
+            <tr id="ids">
+                <td class="info">进程总数</td>
+                <td class="info">{{ worker_nums }}</td>
+            </tr>
+    </table>
+
+    <h3 class="text-muted">运行进程列表</h3>
+    <table class="table table-hover table-striped table-bordered" style="text-align: center;">
+    <tr>
+        <td>节点ID</td>
+        <td>主机名</td>
+        <td>进程数</td>
+        <td colspan="2">增加/减少进程</td>
+    </tr>
+    {% for node in node_list %}
+        <tr>
+            <td>{{ node['macid'] }}</td>
+            <td>{{ node['hostname'] }}</td>
+            <td>{{ node['workers'] }}</td>
+            <td>
+                <form action="{{ url_for('worker_control', macid=node['macid'], controltype='reduce') }}" method="post">
+                    <input class="btn btn-default" type="submit" value="-">
+                </form>
+            </td>
+            <td>
+                <form action="{{ url_for('worker_control', macid=node['macid'], controltype='add') }}" method="post">
+                    <input class="btn btn-default" type="submit" value="+">
+                </form>
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+{% endblock %}
+
+{% block extrascript %}
+    <script>
+    $(function(){
+        $('.nav-justified>li').eq(2).addClass('active');
+    })
+    </script>
+{% endblock %}

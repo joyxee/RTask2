@@ -128,3 +128,11 @@
 </table>
 
 {% endblock %}
+
+{% block extrascript %}
+    <script>
+    $(function(){
+        $('.nav-justified>li').eq(1).addClass('active');
+    })
+    </script>
+{% endblock %}

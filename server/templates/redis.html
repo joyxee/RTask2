@@ -1,0 +1,93 @@
+ {% extends 'base.html' %}
+
+{% block title %}
+Redis状态
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    {% for redis in redis_lists %}
+        <div class="col-md-6">
+            <table class="table table-hover table-striped table-bordered" style="text-align: center;">
+                <tr>
+                    <td>数据库</td>
+                    <td colspan="3">{{ redis['desc'] }}</td>
+                </tr>
+                <tr>
+                    <td>类型</td>
+                    <td colspan="3">{{ redis['type'] }}</td>
+                </tr>
+                <tr>
+                    <td>IP端口</td>
+                    <td colspan="3">
+                        {% if redis['type']=='集群' %}
+                            {% for i in redis['ip_port'] %}
+                                {{ i }} <br>
+                            {% endfor %}
+                        {% else %}
+                            {{ redis['ip_port'] }}
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>占用内存</td>
+                    <td colspan="3">
+                        {% if redis['type']=='集群' %}
+                            {% for i in redis['used_memory'] %}
+                                {{ i }} <br>
+                            {% endfor %}
+                        {% else %}
+                            {{ redis['used_memory'] }}
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>key数量</td>
+                    <td colspan="3">
+                        {% if redis['type']=='集群' %}
+                            {% for i in redis['dbsize'] %}
+                                {{ i }} <br>
+                            {% endfor %}
+                        {% else %}
+                            {{ redis['dbsize'] }}
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>连接数</td>
+                    <td colspan="3">
+                        {% if redis['type']=='集群' %}
+                            {% for i in redis['clients'] %}
+                                {{ i }} <br>
+                            {% endfor %}
+                        {% else %}
+                            {{ redis['clients'] }}
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>操作</td>
+                    <td>
+                        <form action="{{ url_for('redis_save', name=redis['name'], savetype='save') }}" method="post">
+                            <input class="btn btn-success" type="submit" value="SAVE">
+                        </form>
+                    </td>
+                    <td>
+                        <form action="{{ url_for('redis_save', name=redis['name'], savetype='bgsave') }}" method="post">
+                            <input class="btn btn-success" type="submit" value="BGSAVE">
+                        </form>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extrascript %}
+    <script>
+    $(function(){
+        $('.nav-justified>li').eq(3).addClass('active');
+    })
+    </script>
+{% endblock %}

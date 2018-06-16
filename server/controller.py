@@ -22,14 +22,8 @@ def connect_rpc_node(rpc_ip_port):
 class NodeController(object):
     """节点管理类"""
 
-    def __init__(self):
-        self.pool = redis.ConnectionPool(host=config.NODE_REDIS_HOST,
-                                         port=config.NODE_REDIS_PORT,
-                                         db=config.NODE_REDIS_DB,
-                                         password=config.NODE_REDIS_PWD,
-                                         encoding='utf-8',
-                                         decode_responses=True)
-        self.client = redis.StrictRedis(connection_pool=self.pool)
+    def __init__(self, client):
+        self.client = client
 
     def _rpcip_check(self, ip):
         try:
@@ -87,7 +81,7 @@ class NodeController(object):
     def node_stop_worker(self, macid, worker_index=0):
         node = self.node_search(macid)
         with connect_rpc_node(node['rpcip']) as rpc:
-            rpc.stop_worker(config.RPC_PASSWORD, worker_nums)
+            rpc.stop_worker(config.RPC_PASSWORD, worker_index)
 
     def node_stop_all_workers(self, macid):
         node = self.node_search(macid)
@@ -115,3 +109,59 @@ class TaskController(object):
     def __init__(self, arg):
         super(TaskController, self).__init__()
         self.arg = arg
+
+
+class RedisController(object):
+    """Redis管理类，查看Redis数据库相关信息"""
+
+    def __init__(self):
+        node_redis_pool = redis.ConnectionPool(host=config.NODE_REDIS_HOST,
+                                               port=config.NODE_REDIS_PORT,
+                                               db=config.NODE_REDIS_DB,
+                                               password=config.NODE_REDIS_PWD,
+                                               encoding='utf-8',
+                                               decode_responses=True)
+        self.node_client = redis.StrictRedis(connection_pool=node_redis_pool)
+        if config.TASK_DISTINCT:
+            if config.DISTINCT_SET_REDIS_TYPE == 'single':
+                distinct_redis_pool = redis.ConnectionPool(host=config.DISTINCT_SET_REDIS_HOST,
+                                                           port=config.DISTINCT_SET_REDIS_PORT,
+                                                           db=config.DISTINCT_SET_REDIS_DB,
+                                                           password=config.DISTINCT_SET_REDIS_PWD,
+                                                           encoding='utf-8',
+                                                           decode_responses=True)
+                self.distinct_client = redis.StrictRedis(
+                    connection_pool=distinct_redis_pool)
+            else:
+                self.distinct_client = rediscluster.StrictRedisCluster(startup_nodes=config.DISTINCT_SET_REDIS_NODES,
+                                                                       decode_responses=True,
+                                                                       socket_timeout=3,
+                                                                       socket_connect_timeout=3)
+        try:
+            self.node_client.ping()
+            if config.TASK_DISTINCT:
+                self.distinct_client.ping()
+        except Exception as e:
+            self.redis_checked = False
+        else:
+            self.redis_checked = True
+
+    def node_redis_info(self):
+        info = self.node_client.info()
+        info['dbsize'] = self.node_client.dbsize()
+        return info
+
+    def distinct_redis_info(self):
+        info = self.distinct_client.info()
+        if config.DISTINCT_SET_REDIS_TYPE == 'single':
+            info['dbsize'] = self.distinct_client.dbsize()
+        return info
+
+    def node_redis_save(self):
+        return self.node_client.save()
+
+    def distinct_redis_save(self, is_bgsave=False):
+        if is_bgsave:
+            return self.distinct_client.bgsave()
+        else:
+            return self.distinct_client.save()
