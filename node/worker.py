@@ -17,7 +17,7 @@ class WorkerFactory(object):
         self.subprocesses = []
 
     def create_worker(self, worker_nums=1):
-        cmd = shlex.split('python worker.py')
+        cmd = shlex.split('python3 worker.py')
         for _ in range(worker_nums):
             subp = subprocess.Popen(cmd,
                                     stdin=subprocess.PIPE,

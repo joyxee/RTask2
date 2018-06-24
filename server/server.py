@@ -2,12 +2,34 @@
 
 import config
 from flask import Flask, render_template, request, redirect
-from controller import NodeController, RedisController
+from controller import NodeController, RedisController, TaskController
 
 
 app = Flask(__name__)
 redis_controller = RedisController()
 node_controller = NodeController(redis_controller.node_client)
+task_controller = TaskController()
+
+
+##################任务队列###########################
+@app.route('/', methods=['GET'])
+@app.route('/tasks/', methods=['GET'])
+def task_lists():
+    node_list = node_controller.node_list()
+    executable_tasks = list()
+    for n in node_list:
+        executable_tasks.append(n['taskname'])
+    task_list = task_controller.task_list()
+    return render_template('tasks.html', task_list=task_list, executable_tasks=executable_tasks)
+
+
+@app.route('/tasks/add/', methods=['POST'])
+def add_task():
+    taskname = request.form['name']
+    tasknum = request.form['num']
+    for _ in range(int(tasknum)):
+        task_controller.add_task(taskname)
+    return tasknum
 
 
 ##################节点管理###########################
@@ -54,7 +76,7 @@ def worker_lists():
     worker_nums = 0
     for node in node_list:
         worker_nums += node['workers']
-    return render_template('workers.html', 
+    return render_template('workers.html',
                            node_list=node_list,
                            worker_nums=worker_nums)
 
@@ -79,24 +101,30 @@ def redis_lists():
                              'ip_port': config.NODE_REDIS_HOST + ' : ' + str(config.NODE_REDIS_PORT),
                              'dbsize': node_redis_info['dbsize'],
                              'clients': node_redis_info['connected_clients'],
-                             'used_memory': node_redis_info['used_memory_human'] }
+                             'used_memory': node_redis_info['used_memory_human']}
     redis_lists.append(brief_node_redis_info)
 
     if config.TASK_DISTINCT:
         distinct_redis_info = redis_controller.distinct_redis_info()
-        brief_distinct_redis_info = {'desc': 'Redis 数据去重数据库', 'name':'distinct'}
+        brief_distinct_redis_info = {
+            'desc': 'Redis 数据去重数据库', 'name': 'distinct'}
         if config.DISTINCT_SET_REDIS_TYPE == 'single':
             brief_distinct_redis_info['type'] = '单机'
-            brief_distinct_redis_info['ip_port'] = config.DISTINCT_SET_REDIS_HOST + ' : ' + str(config.DISTINCT_SET_REDIS_PORT)
+            brief_distinct_redis_info['ip_port'] = config.DISTINCT_SET_REDIS_HOST + \
+                ' : ' + str(config.DISTINCT_SET_REDIS_PORT)
             brief_distinct_redis_info['dbsize'] = distinct_redis_info['dbsize']
             brief_distinct_redis_info['clients'] = distinct_redis_info['connected_clients']
             brief_distinct_redis_info['used_memory'] = distinct_redis_info['used_memory_human']
         else:
             brief_distinct_redis_info['type'] = '集群'
-            brief_distinct_redis_info['ip_port'] = [node['host'] + ' : ' + node['port'] for node in config.DISTINCT_SET_REDIS_NODES]
-            brief_distinct_redis_info['dbsize'] = [k + ' : ' + str(v) for k, v in redis_controller.distinct_client.items()]
-            brief_distinct_redis_info['clients'] = [k + ' : ' + str(v['connected_clients']) for k, v in distinct_redis_info.items()]
-            brief_distinct_redis_info['used_memory'] = [k + ' : ' + v['used_memory_human'] for k, v in distinct_redis_info.items()]
+            brief_distinct_redis_info['ip_port'] = [
+                node['host'] + ' : ' + node['port'] for node in config.DISTINCT_SET_REDIS_NODES]
+            brief_distinct_redis_info['dbsize'] = [
+                k + ' : ' + str(v) for k, v in redis_controller.distinct_client.items()]
+            brief_distinct_redis_info['clients'] = [
+                k + ' : ' + str(v['connected_clients']) for k, v in distinct_redis_info.items()]
+            brief_distinct_redis_info['used_memory'] = [
+                k + ' : ' + v['used_memory_human'] for k, v in distinct_redis_info.items()]
         redis_lists.append(brief_distinct_redis_info)
 
     return render_template('redis.html', redis_lists=redis_lists)
@@ -111,7 +139,7 @@ def redis_save(name, savetype):
             redis_controller.distinct_redis_save(is_bgsave=True)
     elif name == 'node':
         redis_controller.node_redis_save()
-    
+
     return redirect('/redis/')
 
 

@@ -1,0 +1,104 @@
+ {% extends 'base.html' %}
+
+{% block title %}
+任务队列
+{% endblock %}
+
+{% block content %}
+    <h3 class="text-muted">添加任务</h3>
+    <table class="table table-striped table-bordered" style="text-align: center;">
+            <tr>
+                <td class="info">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default" id="select_task_btn">选择任务</button>
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="caret"></span>
+                            <span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            {% for tname in executable_tasks %}
+                                <li><a onclick="select_task('{{ tname }}')">{{ tname }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </td>
+                <td class="info">
+                    <input type="text" class="form-control" placeholder="输入任务数量，默认为 1" id="tasknum">
+                </td>
+                <td class="info">
+                    <button type="button" class="btn btn-default" id="addtask">提交</button>
+                </td>
+            </tr>
+    </table>
+    <div class="alert alert-warning" id="warningtext">
+    </div>
+
+    <br/>
+    <h3 class="text-muted">总览</h3>
+    <table class="table table-hover table-striped table-bordered" style="text-align: center;">
+        <tr>
+            <td>任务</td>
+            <td>待执行</td>
+            <td>执行中</td>
+            <td>进程数</td>
+        </tr>
+        {% for task in task_list %}
+            <tr>
+                <td>{{ task['task'] }}</td>
+                <td>{{ task['queued'] }}</td>
+                <td>{{ task['running'] }}</td>
+                <td>{{ task['workers'] }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
+
+{% block extrascript %}
+    <script>
+    $(function(){
+        $('.nav-justified>li').eq(0).addClass('active');
+        $('#warningtext').hide();
+
+        cur_select_task = '';
+
+        select_task = function(taskname){
+            $('#select_task_btn').text(taskname);
+            cur_select_task = taskname;
+        }
+
+        $("#addtask").click(function () {
+            if(cur_select_task == ''){
+                $('#warningtext').text('请选择一个任务类型');
+                $('#warningtext').show();
+                setTimeout(function(){
+                    $('#warningtext').hide();
+                }, 2000);
+                return;
+            }
+            task_num = $("#tasknum").val();
+            if(task_num==''){
+                task_num = 1;
+            }
+            $.ajax({
+                type: "POST",
+                url: "{{ url_for('add_task') }}",
+                data: {'name':cur_select_task, 'num':task_num},
+                dataType: "html",
+                cache: false,
+                success: function (res) {
+                    $('#warningtext').text("已添加 "+res+" 个 "+cur_select_task+" 任务");
+                    $('#warningtext').show();
+                    setTimeout(function(){
+                        window.location = "{{ url_for('task_lists') }}"
+                    }, 2000);
+                }
+            });
+        });
+
+        setInterval(function(){
+            window.location = "{{ url_for('task_lists') }}";
+        },3000);
+
+    })
+    </script>
+{% endblock %}

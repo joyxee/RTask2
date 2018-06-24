@@ -5,6 +5,7 @@ import redis
 import zerorpc
 import config
 from contextlib import contextmanager
+from python3_gearman import GearmanClient, GearmanAdminClient
 
 
 @contextmanager
@@ -106,9 +107,18 @@ class NodeController(object):
 class TaskController(object):
     """任务管理类，通过gearman提交任务，查看任务数量等"""
 
-    def __init__(self, arg):
-        super(TaskController, self).__init__()
-        self.arg = arg
+    def __init__(self):
+        self.gm_client = GearmanClient(
+            [config.GEARMAN_HOST+':'+config.GEARMAN_PORT])
+        self.gm_admin_client = GearmanAdminClient(
+            [config.GEARMAN_HOST+':'+config.GEARMAN_PORT])
+
+    def task_list(self):
+        return self.gm_admin_client.get_status()
+
+    def add_task(self, name):
+        data = {} # 后期扩展，任务附加数据
+        self.gm_client.submit_job(name, str(data), background=True)
 
 
 class RedisController(object):
